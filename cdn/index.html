@@ -15,19 +15,37 @@
     <!-- File Icons Library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <style>
+    <style id="themeStyles">
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f5f5f5;
             color: #333;
-            transition: background-color 0.3s, color 0.3s;
         }
 
-        body.dark-mode {
-            background-color: #2e2e2e;
+        /* Dark mode styles */
+        .dark-mode body {
+            background-color: #181818;
             color: #e0e0e0;
+        }
+
+        .dark-mode #breadcrumb {
+            background-color: #242424;
+            border: 1px solid #444;
+        }
+
+        .dark-mode #contentContainer {
+            background-color: #242424;
+            color: #e0e0e0;
+        }
+
+        .dark-mode #contentContainer a {
+            color: #e0e0e0;
+        }
+
+        .dark-mode #contentContainer a:hover {
+            background-color: #333;
         }
 
         #breadcrumb {
@@ -37,21 +55,12 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-
-        body.dark-mode #breadcrumb {
-            background: #3a3a3a;
-            border-color: #444;
         }
 
         #breadcrumb a {
             text-decoration: none;
             color: #007bff;
-        }
-
-        body.dark-mode #breadcrumb a {
-            color: #66aaff;
+            margin-right: 5px;
         }
 
         #breadcrumb a:hover {
@@ -74,16 +83,8 @@
             transition: background 0.3s ease;
         }
 
-        body.dark-mode #contentContainer a {
-            color: #e0e0e0;
-        }
-
         #contentContainer a:hover {
             background-color: #e9ecef;
-        }
-
-        body.dark-mode #contentContainer a:hover {
-            background-color: #4a4a4a;
         }
 
         .file-icon {
@@ -99,29 +100,17 @@
             color: #28a745;
         }
 
-        .file-icon[data-type="txt"] {
-            color: #f39c12;
+        .file-icon[data-type="dir"] {
+            color: #007bff;
         }
 
-        .file-icon[data-type="js"] {
-            color: #f1c40f;
-        }
-
-        .file-icon[data-type="css"] {
-            color: #e74c3c;
-        }
-
-        .file-icon[data-type="html"] {
-            color: #e67e22;
-        }
-
-        .file-icon[data-type="json"] {
-            color: #3498db;
-        }
-
-        .file-icon[data-type="md"] {
-            color: #2ecc71;
-        }
+        /* File type icons */
+        .fa-file-code { color: #e34c26; } /* Example: HTML files */
+        .fa-file-image { color: #4a90e2; } /* Example: Image files */
+        .fa-file-pdf { color: #d32f2f; } /* Example: PDF files */
+        .fa-file-archive { color: #f39c12; } /* Example: Archive files */
+        .fa-file-audio { color: #f57f17; } /* Example: Audio files */
+        .fa-file-video { color: #7f8c8d; } /* Example: Video files */
 
         .breadcrumb-back {
             display: inline-block;
@@ -134,54 +123,14 @@
             color: #007bff;
         }
 
-        body.dark-mode .breadcrumb-back a {
-            color: #66aaff;
-        }
-
         .breadcrumb-back a:hover {
             text-decoration: underline;
-        }
-
-        .button {
-            margin-left: 10px;
-            padding: 5px 10px;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: #fff;
-            text-decoration: none;
-            font-size: 14px;
-            transition: background-color 0.3s, border-color 0.3s;
-            cursor: pointer;
-        }
-
-        .button:hover {
-            background-color: #0056b3;
-            border-color: #004080;
-        }
-
-        body.dark-mode .button {
-            background-color: #0056b3;
-            border-color: #004080;
-        }
-
-        body.dark-mode .button:hover {
-            background-color: #004080;
-            border-color: #003366;
-        }
-
-        iframe {
-            width: 100%;
-            height: 80vh;
-            border: none;
-            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div id="breadcrumb"></div>
     <div id="contentContainer"></div>
-    <iframe id="fileViewer" src="" style="display: none;"></iframe>
 
     <script>
         // Get URL parameters
@@ -191,6 +140,15 @@
         const darkMode = urlParams.get('dark') === 'true';
 
         let currentPath = '';
+
+        // Function to toggle dark mode
+        function applyDarkMode(enable) {
+            if (enable) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
 
         // Function to update breadcrumb navigation
         function updateBreadcrumb(path) {
@@ -233,20 +191,6 @@
             }
         }
 
-        // Function to get file type icon class
-        function getFileTypeIcon(fileName) {
-            const extension = fileName.split('.').pop().toLowerCase();
-            switch (extension) {
-                case 'js': return 'fas fa-file-code';
-                case 'css': return 'fas fa-file-css';
-                case 'html': return 'fas fa-file-code';
-                case 'json': return 'fas fa-file-json';
-                case 'md': return 'fas fa-file-alt';
-                case 'txt': return 'fas fa-file-alt';
-                default: return 'fas fa-file';
-            }
-        }
-
         // Helper function to fetch and render GitHub content
         async function fetchAndRenderContent(repoUrl, path = '') {
             if (!repoUrl) {
@@ -264,7 +208,7 @@
             }
 
             const [, owner, repo] = match;
-            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -280,8 +224,6 @@
                 const data = await response.json();
                 const container = document.getElementById('contentContainer');
                 container.innerHTML = ''; // Clear existing content
-                const fileViewer = document.getElementById('fileViewer');
-                fileViewer.style.display = 'none'; // Hide iframe initially
 
                 // Update breadcrumb
                 updateBreadcrumb(path);
@@ -294,38 +236,58 @@
                     link.target = '_blank';
 
                     const icon = document.createElement('i');
-                    icon.classList.add('file-icon', getFileTypeIcon(item.name));
-                    icon.setAttribute('data-type', item.type);
+                    icon.classList.add('file-icon');
+                    if (item.type === 'file') {
+                        icon.classList.add('fas', 'fa-file');
+                        // Apply file type-specific icons
+                        const ext = item.name.split('.').pop().toLowerCase();
+                        switch (ext) {
+                            case 'html':
+                                icon.classList.add('fa-file-code');
+                                break;
+                            case 'jpg':
+                            case 'jpeg':
+                            case 'png':
+                            case 'gif':
+                                icon.classList.add('fa-file-image');
+                                break;
+                            case 'pdf':
+                                icon.classList.add('fa-file-pdf');
+                                break;
+                            case 'zip':
+                            case 'tar':
+                            case 'gz':
+                                icon.classList.add('fa-file-archive');
+                                break;
+                            case 'mp3':
+                            case 'wav':
+                                icon.classList.add('fa-file-audio');
+                                break;
+                            case 'mp4':
+                            case 'mkv':
+                                icon.classList.add('fa-file-video');
+                                break;
+                            default:
+                                icon.classList.add('fa-file');
+                        }
+                        icon.setAttribute('data-type', 'file');
+                    } else if (item.type === 'dir') {
+                        icon.classList.add('fas', 'fa-folder');
+                        icon.setAttribute('data-type', 'dir');
+                    }
 
                     link.appendChild(icon);
                     link.appendChild(document.createTextNode(item.name));
 
-                    // Add download button
-                    const downloadButton = document.createElement('a');
-                    downloadButton.href = item.download_url;
-                    downloadButton.classList.add('button');
-                    downloadButton.textContent = 'Download';
-                    downloadButton.download = item.name;
-
-                    itemDiv.appendChild(link);
-                    itemDiv.appendChild(downloadButton);
-
-                    // Handle directory click
                     if (item.type === 'dir') {
                         link.onclick = () => {
                             currentPath = path ? `${path}/${item.name}` : item.name;
                             fetchAndRenderContent(repoUrl, currentPath);
                             return false;
                         };
-                    } else {
-                        // Show file in iframe on click
-                        link.onclick = () => {
-                            fileViewer.src = item.download_url;
-                            fileViewer.style.display = 'block';
-                            return false;
-                        };
                     }
 
+                    itemDiv.appendChild(link);
                     container.appendChild(itemDiv);
                 });
             } catch (error) {
@@ -334,10 +296,8 @@
             }
         }
 
-        // Apply dark mode if the URL parameter is set
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
-        }
+        // Apply dark mode if specified
+        applyDarkMode(darkMode);
 
         // Set the content based on the provided GitHub repository URL
         fetchAndRenderContent(repoUrl, currentPath);
@@ -362,4 +322,3 @@
     </script>
 </body>
 </html>
-
