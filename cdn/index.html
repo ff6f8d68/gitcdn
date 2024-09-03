@@ -15,12 +15,23 @@
     <!-- File Icons Library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: #2e2e2e;
+            color: #e0e0e0;
         }
 
         #breadcrumb {
@@ -30,12 +41,21 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-mode #breadcrumb {
+            background: #3a3a3a;
+            border-color: #444;
         }
 
         #breadcrumb a {
             text-decoration: none;
             color: #007bff;
-            margin-right: 5px;
+        }
+
+        body.dark-mode #breadcrumb a {
+            color: #66aaff;
         }
 
         #breadcrumb a:hover {
@@ -58,8 +78,16 @@
             transition: background 0.3s ease;
         }
 
+        body.dark-mode #contentContainer a {
+            color: #e0e0e0;
+        }
+
         #contentContainer a:hover {
             background-color: #e9ecef;
+        }
+
+        body.dark-mode #contentContainer a:hover {
+            background-color: #4a4a4a;
         }
 
         .file-icon {
@@ -79,6 +107,30 @@
             color: #007bff;
         }
 
+        .file-icon[data-type="txt"] {
+            color: #f39c12;
+        }
+
+        .file-icon[data-type="js"] {
+            color: #f1c40f;
+        }
+
+        .file-icon[data-type="css"] {
+            color: #e74c3c;
+        }
+
+        .file-icon[data-type="html"] {
+            color: #e67e22;
+        }
+
+        .file-icon[data-type="json"] {
+            color: #3498db;
+        }
+
+        .file-icon[data-type="md"] {
+            color: #2ecc71;
+        }
+
         .breadcrumb-back {
             display: inline-block;
             margin-top: 10px;
@@ -90,8 +142,29 @@
             color: #007bff;
         }
 
+        body.dark-mode .breadcrumb-back a {
+            color: #66aaff;
+        }
+
         .breadcrumb-back a:hover {
             text-decoration: underline;
+        }
+
+        pre[class*="language-"] {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1em;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+
+        body.dark-mode pre[class*="language-"] {
+            background: #1e1e1e;
+        }
+
+        code[class*="language-"] {
+            color: #dcdcdc;
         }
     </style>
 </head>
@@ -104,6 +177,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const repoUrl = urlParams.get('url');
         const customCss = urlParams.get('customcss');
+        const darkMode = urlParams.get('dark') === 'true';
 
         let currentPath = '';
 
@@ -145,6 +219,20 @@
                 backContainer.appendChild(backLink);
                 breadcrumb.appendChild(document.createTextNode(' | '));
                 breadcrumb.appendChild(backContainer);
+            }
+        }
+
+        // Function to get file type icon class
+        function getFileTypeIcon(fileName) {
+            const extension = fileName.split('.').pop();
+            switch (extension) {
+                case 'js': return 'fas fa-file-code';
+                case 'css': return 'fas fa-file-css';
+                case 'html': return 'fas fa-file-code';
+                case 'json': return 'fas fa-file-json';
+                case 'md': return 'fas fa-file-alt';
+                case 'txt': return 'fas fa-file-alt';
+                default: return 'fas fa-file';
             }
         }
 
@@ -193,19 +281,26 @@
                     link.target = '_blank';
 
                     const icon = document.createElement('i');
-                    icon.classList.add('file-icon');
-                    if (item.type === 'file') {
-                        icon.classList.add('fas', 'fa-file');
-                        icon.setAttribute('data-type', 'file');
-                    } else if (item.type === 'dir') {
-                        icon.classList.add('fas', 'fa-folder');
-                        icon.setAttribute('data-type', 'dir');
-                    }
+                    icon.classList.add('file-icon', getFileTypeIcon(item.name));
+                    icon.setAttribute('data-type', item.type);
 
                     link.appendChild(icon);
                     link.appendChild(document.createTextNode(item.name));
 
-                    if (item.type === 'dir') {
+                    if (item.type === 'file') {
+                        link.onclick = async () => {
+                            if (item.name.endsWith('.js') || item.name.endsWith('.css') || item.name.endsWith('.html') || item.name.endsWith('.json') || item.name.endsWith('.md') || item.name.endsWith('.txt')) {
+                                const fileResponse = await fetch(item.download_url);
+                                if (!fileResponse.ok) {
+                                    container.innerHTML = '<p>Error loading file content.</p>';
+                                    return;
+                                }
+                                const fileContent = await fileResponse.text();
+                                container.innerHTML = `<pre class="language-${item.name.split('.').pop()}"><code>${Prism.highlight(fileContent, Prism.languages.javascript, 'javascript')}</code></pre>`;
+                            }
+                            return false;
+                        };
+                    } else if (item.type === 'dir') {
                         link.onclick = () => {
                             currentPath = path ? `${path}/${item.name}` : item.name;
                             fetchAndRenderContent(repoUrl, currentPath);
@@ -220,6 +315,11 @@
                 console.error('Error:', error);
                 document.getElementById('contentContainer').innerHTML = `<p>Error loading content: ${error.message}</p>`;
             }
+        }
+
+        // Apply dark mode if the URL parameter is set
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
         }
 
         // Set the content based on the provided GitHub repository URL
