@@ -22,7 +22,7 @@
             </label>
         </header>
         <main>
-            <iframe id="contentFrame" src="" frameborder="0"></iframe>
+            <div id="contentContainer"></div>
         </main>
     </div>
 
@@ -30,12 +30,47 @@
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const darkMode = urlParams.get('dark') === 'true';
-        const contentUrl = urlParams.get('url');
+        const repoUrl = urlParams.get('url');
         const customCss = urlParams.get('customcss');
 
-        // Set the iframe src to the provided URL
-        if (contentUrl) {
-            document.getElementById('contentFrame').src = contentUrl;
+        // Helper function to fetch and render GitHub content
+        async function fetchAndRenderContent(repoUrl) {
+            const [owner, repo] = repoUrl.replace('https://github.com/', '').split('/');
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch content');
+                const data = await response.json();
+                const container = document.getElementById('contentContainer');
+                container.innerHTML = ''; // Clear existing content
+
+                // Iterate through files and directories
+                data.forEach(item => {
+                    if (item.type === 'file') {
+                        // Display file name and link
+                        const link = document.createElement('a');
+                        link.href = item.download_url;
+                        link.textContent = item.name;
+                        link.target = '_blank';
+                        container.appendChild(link);
+                        container.appendChild(document.createElement('br'));
+                    } else if (item.type === 'dir') {
+                        // Display directory name
+                        const dirDiv = document.createElement('div');
+                        dirDiv.textContent = `Directory: ${item.name}`;
+                        container.appendChild(dirDiv);
+                    }
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('contentContainer').innerHTML = '<p>Error loading content. Please check the repository URL.</p>';
+            }
+        }
+
+        // Set the content based on the provided GitHub repository URL
+        if (repoUrl) {
+            fetchAndRenderContent(repoUrl);
         }
 
         // Toggle dark mode based on URL parameter
@@ -72,10 +107,12 @@
                 // If it's a URL, load it as an external stylesheet
                 externalCustomCss.href = customCss;
                 inlineCustomCss.innerHTML = '';
+                externalCustomCss.disabled = false; // Ensure it is enabled
             } else {
                 // Otherwise, treat it as direct CSS
                 inlineCustomCss.innerHTML = customCss;
-                externalCustomCss.parentElement.removeChild(externalCustomCss);
+                externalCustomCss.href = ''; // Remove external CSS
+                externalCustomCss.disabled = true; // Disable the link
             }
         }
     </script>
