@@ -11,8 +11,19 @@
     <!-- Placeholder for Custom Styles -->
     <style id="inlineCustomCss"></style>
     <link rel="stylesheet" href="" id="externalCustomCss">
+
+    <style>
+        #contentContainer a {
+            display: block;
+            margin: 5px 0;
+        }
+        #breadcrumb {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
+    <div id="breadcrumb"></div>
     <div id="contentContainer"></div>
 
     <script>
@@ -21,45 +32,117 @@
         const repoUrl = urlParams.get('url');
         const customCss = urlParams.get('customcss');
 
+        let currentPath = '';
+
+        // Function to update breadcrumb navigation
+        function updateBreadcrumb(path) {
+            const breadcrumb = document.getElementById('breadcrumb');
+            const pathSegments = path.split('/').filter(segment => segment);
+            breadcrumb.innerHTML = '';
+
+            let fullPath = '';
+            pathSegments.forEach((segment, index) => {
+                fullPath += (index > 0 ? '/' : '') + segment;
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = segment;
+                link.onclick = () => {
+                    currentPath = fullPath;
+                    fetchAndRenderContent(repoUrl, currentPath);
+                    return false;
+                };
+                breadcrumb.appendChild(link);
+                if (index < pathSegments.length - 1) {
+                    breadcrumb.appendChild(document.createTextNode(' > '));
+                }
+            });
+
+            // Add 'Back to root' link if not at root
+            if (pathSegments.length > 0) {
+                const backLink = document.createElement('a');
+                backLink.href = '#';
+                backLink.textContent = 'Back to root';
+                backLink.onclick = () => {
+                    currentPath = '';
+                    fetchAndRenderContent(repoUrl, currentPath);
+                    return false;
+                };
+                breadcrumb.appendChild(document.createTextNode(' | '));
+                breadcrumb.appendChild(backLink);
+            }
+        }
+
         // Helper function to fetch and render GitHub content
-        async function fetchAndRenderContent(repoUrl) {
-            const [owner, repo] = repoUrl.replace('https://github.com/', '').split('/');
-            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents`;
+        async function fetchAndRenderContent(repoUrl, path = '') {
+            if (!repoUrl) {
+                document.getElementById('contentContainer').innerHTML = '<p>No repository URL provided.</p>';
+                return;
+            }
+
+            // Extract owner and repo from URL
+            const regex = /https:\/\/github\.com\/([^\/]+)\/([^\/]+)/;
+            const match = repoUrl.match(regex);
+
+            if (!match) {
+                document.getElementById('contentContainer').innerHTML = '<p>Invalid repository URL format. Please use https://github.com/owner/repo.</p>';
+                return;
+            }
+
+            const [, owner, repo] = match;
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
             try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Failed to fetch content');
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.statusText}`);
+                }
+
                 const data = await response.json();
                 const container = document.getElementById('contentContainer');
                 container.innerHTML = ''; // Clear existing content
 
+                // Update breadcrumb
+                updateBreadcrumb(path);
+
                 // Iterate through files and directories
                 data.forEach(item => {
+                    const itemDiv = document.createElement('div');
+
                     if (item.type === 'file') {
                         // Display file name and link
                         const link = document.createElement('a');
                         link.href = item.download_url;
                         link.textContent = item.name;
                         link.target = '_blank';
-                        container.appendChild(link);
-                        container.appendChild(document.createElement('br'));
+                        itemDiv.appendChild(link);
                     } else if (item.type === 'dir') {
-                        // Display directory name
-                        const dirDiv = document.createElement('div');
-                        dirDiv.textContent = `Directory: ${item.name}`;
-                        container.appendChild(dirDiv);
+                        // Display directory name with navigation
+                        const dirLink = document.createElement('a');
+                        dirLink.href = '#';
+                        dirLink.textContent = `Directory: ${item.name}`;
+                        dirLink.onclick = () => {
+                            currentPath = path ? `${path}/${item.name}` : item.name;
+                            fetchAndRenderContent(repoUrl, currentPath);
+                            return false;
+                        };
+                        itemDiv.appendChild(dirLink);
                     }
+
+                    container.appendChild(itemDiv);
                 });
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('contentContainer').innerHTML = '<p>Error loading content. Please check the repository URL.</p>';
+                document.getElementById('contentContainer').innerHTML = `<p>Error loading content: ${error.message}</p>`;
             }
         }
 
         // Set the content based on the provided GitHub repository URL
-        if (repoUrl) {
-            fetchAndRenderContent(repoUrl);
-        }
+        fetchAndRenderContent(repoUrl, currentPath);
 
         // Handle custom CSS (either as direct CSS or as a URL)
         if (customCss) {
