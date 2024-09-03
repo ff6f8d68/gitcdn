@@ -13,23 +13,11 @@
     <link rel="stylesheet" href="" id="externalCustomCss">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>GitHub CDN Viewer</h1>
-            <label class="switch">
-                <input type="checkbox" id="darkModeToggle">
-                <span class="slider round"></span>
-            </label>
-        </header>
-        <main>
-            <div id="contentContainer"></div>
-        </main>
-    </div>
+    <div id="contentContainer"></div>
 
     <script>
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const darkMode = urlParams.get('dark') === 'true';
         const repoUrl = urlParams.get('url');
         const customCss = urlParams.get('customcss');
 
@@ -72,31 +60,6 @@
         if (repoUrl) {
             fetchAndRenderContent(repoUrl);
         }
-
-        // Toggle dark mode based on URL parameter
-        const toggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        const setDarkMode = (enabled) => {
-            if (enabled) {
-                body.classList.add('dark-mode');
-                toggle.checked = true;
-            } else {
-                body.classList.remove('dark-mode');
-                toggle.checked = false;
-            }
-        };
-
-        setDarkMode(darkMode);
-
-        // Add event listener to toggle switch
-        toggle.addEventListener('change', (e) => {
-            const isEnabled = e.target.checked;
-            setDarkMode(isEnabled);
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.set('dark', isEnabled);
-            window.history.replaceState(null, '', newUrl.toString());
-        });
 
         // Handle custom CSS (either as direct CSS or as a URL)
         if (customCss) {
