@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitCDN Link Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GitCDN Link Generator</h1>
+        </header>
+        <main>
+            <form id="generatorForm">
+                <label for="contentUrl">GitHub Content URL:</label>
+                <input type="text" id="contentUrl" name="contentUrl" placeholder="https://github.com/user/repo/raw/branch/file.html" required>
+                
+                <label for="darkMode">Dark Mode:</label>
+                <select id="darkMode" name="darkMode">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+                
+                <label for="customCss">Custom CSS (URL or Direct CSS):</label>
+                <input type="text" id="customCss" name="customCss" placeholder="https://example.com/custom.css or CSS code">
+                
+                <button type="submit">Generate Link</button>
+            </form>
+
+            <div id="result">
+                <p>Generated GitCDN Link:</p>
+                <input type="text" id="generatedLink" readonly>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('generatorForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const contentUrl = encodeURIComponent(document.getElementById('contentUrl').value);
+            const darkMode = document.getElementById('darkMode').value;
+            const customCss = encodeURIComponent(document.getElementById('customCss').value);
+
+            const baseUrl = 'https://gitcdn.netlify.app/gitcdn';
+            const params = new URLSearchParams({
+                url: contentUrl,
+                dark: darkMode,
+                customcss: customCss
+            }).toString();
+
+            const generatedLink = `${baseUrl}?${params}`;
+            document.getElementById('generatedLink').value = generatedLink;
+        });
+    </script>
+</body>
+</html>
