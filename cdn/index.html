@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,13 +15,18 @@
     <!-- File Icons Library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <style id="themeStyles">
+    <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f3f4f6;
             color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
         /* Dark mode styles */
@@ -31,10 +35,9 @@
             color: #e0e0e0;
         }
 
-        .dark-mode #breadcrumb,
-        .dark-mode #sidePanel {
+        .dark-mode #navbar {
             background-color: #2d2d2d;
-            border: 1px solid #444;
+            border-bottom: 1px solid #444;
         }
 
         .dark-mode #contentContainer {
@@ -59,17 +62,18 @@
             background-color: #f1f1f1;
             border-bottom: 1px solid #ccc;
             padding: 10px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
             display: flex;
-            align-items: center;
+            justify-content: center;
             gap: 10px;
-        }
-
-        #navbar img {
-            width: 24px;
+            z-index: 1000;
         }
 
         #navbar input[type="text"] {
-            width: 400px;
+            width: 300px;
             padding: 5px;
             border-radius: 4px;
             border: 1px solid #ccc;
@@ -89,19 +93,19 @@
         }
 
         #breadcrumb {
-            margin: 0;
+            margin: 60px 0 20px; /* Adjust for navbar and spacing */
             padding: 10px;
             background: #f1f1f1;
             border-bottom: 1px solid #ccc;
             font-size: 14px;
-            display: flex;
-            align-items: center;
+            width: 100%;
+            text-align: center;
         }
 
         #breadcrumb a {
             text-decoration: none;
             color: #007bff;
-            margin-right: 5px;
+            margin: 0 5px;
         }
 
         #breadcrumb a:hover {
@@ -110,8 +114,11 @@
 
         #mainContainer {
             display: flex;
-            height: calc(100vh - 80px); /* Adjust height considering the navbar and breadcrumb */
-            margin-top: 10px;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            width: 100%;
+            overflow: hidden;
         }
 
         #sidePanel {
@@ -120,17 +127,24 @@
             border-right: 1px solid #ccc;
             padding: 10px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         #sidePanel ul {
             list-style-type: none;
             padding: 0;
+            margin: 0;
+            width: 100%;
         }
 
         #sidePanel li {
             padding: 5px;
             margin-bottom: 5px;
             cursor: pointer;
+            width: 100%;
+            text-align: center;
         }
 
         #sidePanel li:hover {
@@ -140,9 +154,9 @@
         #contentContainer {
             flex: 1;
             padding: 10px;
-            overflow-y: auto;
             background-color: white;
             border-left: 1px solid #ccc;
+            overflow-y: auto;
         }
 
         #contentContainer table {
@@ -177,32 +191,39 @@
             background-color: #e9ecef;
         }
 
-        /* File type icons */
-        .fa-file-code { color: #e34c26; } /* HTML files */
-        .fa-file-image { color: #4a90e2; } /* Image files */
-        .fa-file-pdf { color: #d32f2f; } /* PDF files */
-        .fa-file-archive { color: #f39c12; } /* Archive files */
-        .fa-file-audio { color: #f57f17; } /* Audio files */
-        .fa-file-video { color: #7f8c8d; } /* Video files */
-        .fa-file-word { color: #1f9bfc; } /* Word files */
-        .fa-file-excel { color: #4caf50; } /* Excel files */
-        .fa-file-powerpoint { color: #f39c12; } /* PowerPoint files */
-        .fa-file-csv { color: #ff6f00; } /* CSV files */
-        .fa-file-text { color: #666; } /* Text files */
-
+        /* File viewer */
         #fileViewer {
-            width: 100%;
-            height: 40vh;
-            border: none;
             display: none; /* Hidden by default */
+            width: 100%;
+            height: calc(100vh - 60px); /* Adjust height considering the navbar */
+            border: none;
             margin-top: 20px;
+        }
+
+        .file-viewer-header {
+            display: flex;
+            justify-content: flex-end;
+            background: #f1f1f1;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .file-viewer-header button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .file-viewer-header button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
-
 <body>
     <div id="navbar">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Windows_logo_-_2021.svg" alt="Windows Logo">
         <input type="text" placeholder="Search">
         <button>Search</button>
     </div>
@@ -210,17 +231,17 @@
     <div id="mainContainer">
         <div id="sidePanel">
             <ul>
-                <li>Home</li>
-                <li>Documents</li>
-                <li>Downloads</li>
-                <li>Pictures</li>
-                <li>Music</li>
-                <li>Videos</li>
+                <li id="homeButton">Home</li>
             </ul>
         </div>
         <div id="contentContainer"></div>
     </div>
-    <iframe id="fileViewer"></iframe>
+    <div id="fileViewer">
+        <div class="file-viewer-header">
+            <button id="closeFileViewer">X</button>
+        </div>
+        <iframe id="fileViewerFrame"></iframe>
+    </div>
 
     <script>
         // Get URL parameters
@@ -402,7 +423,7 @@
                     if (item.type === 'file') {
                         link.onclick = () => {
                             document.getElementById('fileViewer').style.display = 'block';
-                            document.getElementById('fileViewer').src = item.download_url.replace('https://github.com', 'https://raw.githubusercontent.com').replace('/blob/', '/');
+                            document.getElementById('fileViewerFrame').src = item.download_url.replace('https://github.com', 'https://raw.githubusercontent.com').replace('/blob/', '/');
                             return false;
                         };
                     } else if (item.type === 'dir') {
@@ -435,6 +456,18 @@
             }
         }
 
+        // Handle the 'Home' button click
+        document.getElementById('homeButton').onclick = () => {
+            currentPath = '';
+            fetchAndRenderContent(repoUrl, currentPath);
+        };
+
+        // Handle the 'Close' button click in the file viewer
+        document.getElementById('closeFileViewer').onclick = () => {
+            document.getElementById('fileViewer').style.display = 'none';
+            document.getElementById('contentContainer').style.display = 'block';
+        };
+
         // Apply dark mode if specified
         applyDarkMode(darkMode);
 
@@ -460,5 +493,4 @@
         }
     </script>
 </body>
-
 </html>
