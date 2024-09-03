@@ -28,21 +28,6 @@
             color: #e0e0e0;
         }
 
-        .dark-mode #navbar {
-            background-color: #2d2d2d;
-            border-bottom: 1px solid #444;
-        }
-
-        .dark-mode #contentContainer {
-            background-color: #2d2d2d;
-            color: #e0e0e0;
-        }
-
-        .dark-mode #fileViewer {
-            background-color: #2d2d2d;
-            color: #e0e0e0;
-        }
-
         #navbar {
             background: #007bff;
             padding: 15px;
@@ -207,7 +192,6 @@
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const repoUrl = urlParams.get('url');
-        const customCss = urlParams.get('customcss');
         const darkMode = urlParams.get('dark') === 'true';
 
         let currentPath = '';
@@ -422,24 +406,6 @@
 
         // Set the content based on the provided GitHub repository URL
         fetchAndRenderContent(repoUrl, currentPath);
-
-        // Handle custom CSS (either as direct CSS or as a URL)
-        if (customCss) {
-            const inlineCustomCss = document.getElementById('inlineCustomCss');
-            const externalCustomCss = document.getElementById('externalCustomCss');
-
-            if (customCss.startsWith('http://') || customCss.startsWith('https://')) {
-                // If it's a URL, load it as an external stylesheet
-                externalCustomCss.href = customCss;
-                inlineCustomCss.innerHTML = '';
-                externalCustomCss.disabled = false; // Ensure it is enabled
-            } else {
-                // Otherwise, treat it as direct CSS
-                inlineCustomCss.innerHTML = customCss;
-                externalCustomCss.href = ''; // Remove external CSS
-                externalCustomCss.disabled = true; // Disable the link
-            }
-        }
     </script>
 </body>
 </html>
