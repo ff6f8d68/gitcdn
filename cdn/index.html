@@ -157,7 +157,9 @@
             transition: background-color 0.3s;
         }
 
-
+        #sidePanel li:hover {
+            background-color: #f0f0f0;
+        }
 
         #contentContainer {
             flex: 1;
@@ -204,7 +206,11 @@
             color: #333;
         }
 
-     
+        #contentContainer a:hover {
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 8px;
+        }
 
         /* File viewer */
         #fileViewer {
@@ -241,7 +247,9 @@
             transition: background-color 0.3s;
         }
 
-      
+        .file-viewer-header button:hover {
+            background-color: #c82333;
+        }
 
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -268,7 +276,9 @@
     </div>
     <div id="breadcrumb"></div>
     <div id="mainContainer">
-       
+        <div id="sidePanel">
+            
+        </div>
         <div id="contentContainer"></div>
     </div>
     <div id="fileViewer">
