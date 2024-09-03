@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,23 +21,24 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+            background-color: #f3f4f6;
             color: #333;
         }
 
         /* Dark mode styles */
         .dark-mode body {
-            background-color: #181818;
+            background-color: #1d1d1d;
             color: #e0e0e0;
         }
 
-        .dark-mode #breadcrumb {
-            background-color: #242424;
+        .dark-mode #breadcrumb,
+        .dark-mode #sidePanel {
+            background-color: #2d2d2d;
             border: 1px solid #444;
         }
 
         .dark-mode #contentContainer {
-            background-color: #242424;
+            background-color: #2d2d2d;
             color: #e0e0e0;
         }
 
@@ -45,16 +47,56 @@
         }
 
         .dark-mode #contentContainer a:hover {
-            background-color: #333;
+            background-color: #3a3a3a;
+        }
+
+        .dark-mode #fileViewer {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        #navbar {
+            background-color: #f1f1f1;
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        #navbar img {
+            width: 24px;
+            margin-right: 10px;
+        }
+
+        #navbar input[type="text"] {
+            width: 400px;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        #navbar button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        #navbar button:hover {
+            background-color: #0056b3;
         }
 
         #breadcrumb {
-            margin: 20px;
+            margin: 0;
             padding: 10px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            background: #f1f1f1;
+            border-bottom: 1px solid #ccc;
             font-size: 14px;
+            display: flex;
+            align-items: center;
         }
 
         #breadcrumb a {
@@ -67,13 +109,61 @@
             text-decoration: underline;
         }
 
-        #contentContainer {
-            padding: 20px;
+        #mainContainer {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            max-width: 1200px;
-            margin: 0 auto;
+            height: 90vh;
+        }
+
+        #sidePanel {
+            width: 200px;
+            background-color: #f1f1f1;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        #sidePanel ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #sidePanel li {
+            padding: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        #sidePanel li:hover {
+            background-color: #ddd;
+        }
+
+        #contentContainer {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: white;
+            border-left: 1px solid #ccc;
+        }
+
+        #contentContainer table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #contentContainer th,
+        #contentContainer td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #contentContainer th {
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        #contentContainer td i {
+            margin-right: 10px;
         }
 
         #contentContainer a {
@@ -81,35 +171,10 @@
             align-items: center;
             text-decoration: none;
             color: #333;
-            width: 150px;
-            height: 150px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: background 0.3s ease, transform 0.2s ease;
         }
 
         #contentContainer a:hover {
             background-color: #e9ecef;
-            transform: scale(1.05);
-        }
-
-        .file-icon {
-            margin-right: 10px;
-            font-size: 40px;
-        }
-
-        .directory-icon {
-            color: #007bff;
-        }
-
-        .file-icon[data-type="file"] {
-            color: #28a745;
-        }
-
-        .file-icon[data-type="dir"] {
-            color: #007bff;
         }
 
         /* File type icons */
@@ -125,25 +190,38 @@
         .fa-file-csv { color: #ff6f00; } /* CSV files */
         .fa-file-text { color: #666; } /* Text files */
 
-        .breadcrumb-back {
-            display: inline-block;
-            margin-top: 10px;
-            font-size: 14px;
+        #fileViewer {
+            width: 100%;
+            height: 40vh;
+            border: none;
+            display: none; /* Hidden by default */
+            margin-top: 20px;
         }
 
-        .breadcrumb-back a {
-            text-decoration: none;
-            color: #007bff;
-        }
-
-        .breadcrumb-back a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
+
 <body>
+    <div id="navbar">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/34/Windows_logo_-_2021.svg" alt="Windows Logo">
+        <input type="text" placeholder="Search">
+        <button>Search</button>
+    </div>
     <div id="breadcrumb"></div>
-    <div id="contentContainer"></div>
+    <div id="mainContainer">
+        <div id="sidePanel">
+            <ul>
+                <li>Home</li>
+                <li>Documents</li>
+                <li>Downloads</li>
+                <li>Pictures</li>
+                <li>Music</li>
+                <li>Videos</li>
+            </ul>
+        </div>
+        <div id="contentContainer"></div>
+    </div>
+    <iframe id="fileViewer"></iframe>
 
     <script>
         // Get URL parameters
@@ -241,75 +319,96 @@
                 // Update breadcrumb
                 updateBreadcrumb(path);
 
+                // Create table for files and directories
+                const table = document.createElement('table');
+                const tableHeader = `
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Last Modified</th>
+                    </tr>
+                `;
+                table.innerHTML = tableHeader;
+
                 // Iterate through files and directories
                 data.forEach(item => {
-                    const itemDiv = document.createElement('div');
+                    const row = document.createElement('tr');
+                    const nameCell = document.createElement('td');
+                    const typeCell = document.createElement('td');
+                    const sizeCell = document.createElement('td');
+                    const dateCell = document.createElement('td');
+
                     const link = document.createElement('a');
                     link.href = item.type === 'file' ? item.download_url : '#';
                     link.target = '_blank';
 
                     const icon = document.createElement('i');
-                    icon.classList.add('file-icon');
-                    if (item.type === 'file') {
-                        icon.classList.add('fas', 'fa-file');
-                        // Apply file type-specific icons
-                        const ext = item.name.split('.').pop().toLowerCase();
-                        switch (ext) {
-                            case 'html':
-                                icon.classList.add('fa-file-code');
-                                break;
-                            case 'jpg':
-                            case 'jpeg':
-                            case 'png':
-                            case 'gif':
-                                icon.classList.add('fa-file-image');
-                                break;
-                            case 'pdf':
-                                icon.classList.add('fa-file-pdf');
-                                break;
-                            case 'zip':
-                            case 'tar':
-                            case 'gz':
-                                icon.classList.add('fa-file-archive');
-                                break;
-                            case 'mp3':
-                            case 'wav':
-                                icon.classList.add('fa-file-audio');
-                                break;
-                            case 'mp4':
-                            case 'avi':
-                            case 'mov':
-                                icon.classList.add('fa-file-video');
-                                break;
-                            case 'doc':
-                            case 'docx':
-                                icon.classList.add('fa-file-word');
-                                break;
-                            case 'xls':
-                            case 'xlsx':
-                                icon.classList.add('fa-file-excel');
-                                break;
-                            case 'ppt':
-                            case 'pptx':
-                                icon.classList.add('fa-file-powerpoint');
-                                break;
-                            case 'csv':
-                                icon.classList.add('fa-file-csv');
-                                break;
-                            default:
-                                icon.classList.add('fa-file-text');
-                                break;
-                        }
-                        icon.setAttribute('data-type', 'file');
-                    } else if (item.type === 'dir') {
-                        icon.classList.add('fas', 'fa-folder');
-                        icon.setAttribute('data-type', 'dir');
-                    }
+                    const fileExtension = item.name.split('.').pop().toLowerCase();
 
+                    switch (fileExtension) {
+                        case 'html':
+                        case 'css':
+                        case 'js':
+                        case 'json':
+                        case 'xml':
+                            icon.classList.add('fas', 'fa-file-code');
+                            break;
+                        case 'jpg':
+                        case 'jpeg':
+                        case 'png':
+                        case 'gif':
+                            icon.classList.add('fas', 'fa-file-image');
+                            break;
+                        case 'pdf':
+                            icon.classList.add('fas', 'fa-file-pdf');
+                            break;
+                        case 'zip':
+                        case 'tar':
+                        case 'gz':
+                            icon.classList.add('fas', 'fa-file-archive');
+                            break;
+                        case 'mp3':
+                        case 'wav':
+                            icon.classList.add('fas', 'fa-file-audio');
+                            break;
+                        case 'mp4':
+                        case 'avi':
+                        case 'mov':
+                            icon.classList.add('fas', 'fa-file-video');
+                            break;
+                        case 'doc':
+                        case 'docx':
+                            icon.classList.add('fas', 'fa-file-word');
+                            break;
+                        case 'xls':
+                        case 'xlsx':
+                            icon.classList.add('fas', 'fa-file-excel');
+                            break;
+                        case 'ppt':
+                        case 'pptx':
+                            icon.classList.add('fas', 'fa-file-powerpoint');
+                            break;
+                        case 'csv':
+                            icon.classList.add('fas', 'fa-file-csv');
+                            break;
+                        default:
+                            icon.classList.add('fas', 'fa-file-alt');
+                            break;
+                    }
+                    icon.setAttribute('data-type', 'file');
                     link.appendChild(icon);
                     link.appendChild(document.createTextNode(item.name));
 
-                    if (item.type === 'dir') {
+                    if (item.type === 'file') {
+                        link.onclick = () => {
+                            document.getElementById('fileViewer').style.display = 'block';
+                            document.getElementById('fileViewer').src = item.download_url.replace('https://github.com', 'https://raw.githubusercontent.com').replace('/blob/', '/');
+                            return false;
+                        };
+                    } else if (item.type === 'dir') {
+                        icon.classList.add('fas', 'fa-folder');
+                        icon.setAttribute('data-type', 'dir');
                         link.onclick = () => {
                             currentPath = path ? `${path}/${item.name}` : item.name;
                             fetchAndRenderContent(repoUrl, currentPath);
@@ -317,9 +416,20 @@
                         };
                     }
 
-                    itemDiv.appendChild(link);
-                    container.appendChild(itemDiv);
+                    nameCell.appendChild(link);
+                    typeCell.textContent = item.type === 'file' ? 'File' : 'Directory';
+                    sizeCell.textContent = item.size ? `${(item.size / 1024).toFixed(2)} KB` : '—';
+                    dateCell.textContent = new Date(item.last_modified || new Date()).toLocaleString();
+
+                    row.appendChild(nameCell);
+                    row.appendChild(typeCell);
+                    row.appendChild(sizeCell);
+                    row.appendChild(dateCell);
+
+                    table.appendChild(row);
                 });
+
+                container.appendChild(table);
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('contentContainer').innerHTML = `<p>Error loading content: ${error.message}</p>`;
@@ -351,4 +461,5 @@
         }
     </script>
 </body>
+
 </html>
