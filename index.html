@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitCDN Link Generator</title>
+    <title>githubCDN Link Generator</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,7 +29,7 @@
             </form>
 
             <div id="result">
-                <p>Generated GitCDN Link:</p>
+                <p>Generated githubCDN Link:</p>
                 <input type="text" id="generatedLink" readonly>
             </div>
         </main>
@@ -39,10 +39,17 @@
         document.getElementById('generatorForm').addEventListener('submit', function(event) {
             event.preventDefault();
             
-            const contentUrl = encodeURIComponent(document.getElementById('contentUrl').value);
+            // Fetch and parse the input values
+            let contentUrl = document.getElementById('contentUrl').value.trim();
             const darkMode = document.getElementById('darkMode').value;
-            const customCss = encodeURIComponent(document.getElementById('customCss').value);
+            const customCss = document.getElementById('customCss').value.trim();
 
+            // Custom modification for specific URL
+            if (contentUrl === 'https://github.com/ff6f8d68/gitcdn/') {
+                contentUrl = 'https://github.com/ff6f8d68/IPNMT-2';
+            }
+
+            // Generate the link without URL encoding
             const baseUrl = 'https://githubcdn.netlify.app/cdn';
             const params = new URLSearchParams({
                 url: contentUrl,
@@ -50,7 +57,7 @@
                 customcss: customCss
             });
 
-            const generatedLink = `${baseUrl}?${params}`;
+            const generatedLink = `${baseUrl}/?${params}`;
             document.getElementById('generatedLink').value = generatedLink;
         });
     </script>
