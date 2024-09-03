@@ -224,7 +224,7 @@
 
         // Function to get file type icon class
         function getFileTypeIcon(fileName) {
-            const extension = fileName.split('.').pop();
+            const extension = fileName.split('.').pop().toLowerCase();
             switch (extension) {
                 case 'js': return 'fas fa-file-code';
                 case 'css': return 'fas fa-file-css';
@@ -297,6 +297,8 @@
                                 }
                                 const fileContent = await fileResponse.text();
                                 container.innerHTML = `<pre class="language-${item.name.split('.').pop()}"><code>${Prism.highlight(fileContent, Prism.languages.javascript, 'javascript')}</code></pre>`;
+                            } else {
+                                container.innerHTML = '<p>Unsupported file type for preview.</p>';
                             }
                             return false;
                         };
